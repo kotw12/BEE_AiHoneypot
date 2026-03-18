@@ -1,0 +1,381 @@
+{% extends "base.html" %}
+
+{% block title %}보안 분석 대시보드 - Honey{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 pb-20">
+    <div class="bg-gray-900 text-white pt-16 pb-24 px-6 text-center shadow-inner relative overflow-hidden">
+        <!-- Abstract background pattern -->
+        <div class="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+CjxwYXRoIGQ9Ik0wIDBoNDB2NDBIMHoiIGZpbGw9Im5vbmUiLz4KPHBhdGggZD0iTTAgMGw0MCA0ME00MCAwbC00MCA0MCIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjIiIG9wYWNpdHk9IjAuMSIvPgo8L3N2Zz4=')]"></div>
+        <div class="relative z-10">
+            <h1 class="text-4xl font-extrabold mb-4 tracking-tight">지능형 분석 리포트 <span class="text-amber-500">대시보드</span></h1>
+            <p class="text-gray-400 max-w-2xl mx-auto">현재 시스템에 인입된 모든 공격 페이로드와 허니팟의 방어/기만 이력을 실시간으로 모니터링합니다.</p>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-6 -mt-16 relative z-20">
+        <!-- Stats Row -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">총 탐지 건수</p>
+                    <h3 class="text-3xl font-black text-gray-900" id="statTotal">0</h3>
+                </div>
+                <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 text-xl">🛡️</div>
+            </div>
+            <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">SQL Injection</p>
+                    <h3 class="text-3xl font-black text-amber-500" id="statSqli">0</h3>
+                </div>
+                <div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 text-xl">💾</div>
+            </div>
+            <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">XSS</p>
+                    <h3 class="text-3xl font-black text-purple-500" id="statXss">0</h3>
+                </div>
+                <div class="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center text-purple-500 text-xl">⚡</div>
+            </div>
+            <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Prompt Injection</p>
+                    <h3 class="text-3xl font-black text-red-500" id="statPrompt">0</h3>
+                </div>
+                <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-500 text-xl">🧠</div>
+            </div>
+        </div>
+
+        <!-- Log Table -->
+        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+            <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <h2 class="text-lg font-bold text-gray-800 flex items-center">
+                    <span class="w-2.5 h-2.5 rounded-full bg-red-500 mr-2 animate-pulse"></span> 실시간 인입 로그
+                </h2>
+                <div class="flex space-x-3">
+                    <button id="aiReportBtn" class="text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg flex items-center transition-colors shadow-sm">
+                        <span class="mr-2 text-lg leading-none">🤖</span>
+                        AI 리포트 생성
+                    </button>
+                    <button id="refreshBtn" class="text-sm font-medium text-gray-600 hover:text-gray-900 border border-gray-200 bg-white hover:bg-gray-50 px-4 py-2 rounded-lg flex items-center transition-colors shadow-sm">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        새로고침
+                    </button>
+                </div>
+            </div>
+            <div class="overflow-x-auto max-h-[600px] overflow-y-auto">
+                <table class="w-full text-left border-collapse whitespace-nowrap">
+                    <thead class="sticky top-0 bg-white z-10 shadow-sm">
+                        <tr class="text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100">
+                            <th class="py-4 px-6 w-48">시간 (Timestamp)</th>
+                            <th class="py-4 px-6 w-32">공격자 IP</th>
+                            <th class="py-4 px-6 w-40">공격 엔드포인트</th>
+                            <th class="py-4 px-6 w-48">공격 유형</th>
+                            <th class="py-4 px-6">페이로드 (Payload)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logBody" class="divide-y divide-gray-50 font-mono text-sm text-gray-600">
+                        <!-- Logs will be populated here by JS -->
+                        <tr>
+                            <td colspan="5" class="py-12 text-center text-gray-400 font-sans">
+                                로그 데이터를 불러오는 중입니다...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AI Report Modal -->
+<div id="aiModal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden border border-gray-200 transform transition-all">
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/80">
+            <h3 class="text-xl font-black text-gray-900 flex items-center">
+                <span class="text-2xl mr-2">🤖</span> 종합 보안 분석 리포트
+            </h3>
+            <div class="flex items-center space-x-3">
+                <button id="downloadPdfBtn" class="hidden text-sm font-bold text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded flex items-center transition-colors shadow-sm">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    PDF 다운로드
+                </button>
+                <button id="closeModalBtn" class="text-gray-400 hover:text-red-500 transition-colors bg-white rounded-full p-1 border border-gray-200 hover:border-red-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </div>
+        <div class="p-8 overflow-y-auto w-full bg-white relative" id="printArea">
+            <div id="aiReportContent">
+                <!-- Content -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+let globalLogs = [];
+function getBadgeColor(type) {
+    if (type.includes('SQL')) return 'bg-amber-100 text-amber-800 border bg-amber-50 border-amber-200';
+    if (type.includes('XSS')) return 'bg-purple-100 text-purple-800 border bg-purple-50 border-purple-200';
+    if (type.includes('Prompt')) return 'bg-red-100 text-red-800 border bg-red-50 border-red-200';
+    return 'bg-gray-100 text-gray-800';
+}
+
+function escapeHtml(unsafe) {
+    return (unsafe || "").toString()
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+}
+
+async function fetchLogs() {
+    try {
+        const refreshBtn = document.getElementById('refreshBtn');
+        refreshBtn.classList.add('animate-spin');
+        
+        const response = await fetch('/api/dashboard/logs');
+        const logs = await response.json();
+        globalLogs = logs;
+        
+        const tbody = document.getElementById('logBody');
+        tbody.innerHTML = '';
+        
+        if (logs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="py-12 text-center text-gray-400 font-sans">기록된 공격 로그가 없습니다.</td></tr>';
+        } else {
+            let statSqli = 0;
+            let statXss = 0;
+            let statPrompt = 0;
+
+            let htmlString = '';
+            logs.forEach(log => {
+                if(log.type.includes('SQL')) statSqli++;
+                if(log.type.includes('XSS')) statXss++;
+                if(log.type.includes('Prompt')) statPrompt++;
+
+                htmlString += `
+                <tr class="hover:bg-gray-50 transition-colors/50">
+                    <td class="py-3 px-6 text-gray-400">${escapeHtml(log.timestamp)}</td>
+                    <td class="py-3 px-6"><span class="bg-gray-100 text-gray-800 px-2.5 py-1 rounded shadow-inner text-xs font-bold block w-fit">${escapeHtml(log.ip)}</span></td>
+                    <td class="py-3 px-6"><span class="text-gray-500 font-medium">${escapeHtml(log.endpoint)}</span></td>
+                    <td class="py-3 px-6"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${getBadgeColor(log.type)}">${escapeHtml(log.type)}</span></td>
+                    <td class="py-3 px-6"><div class="max-w-md truncate cursor-pointer hover:whitespace-normal hover:break-all hover:bg-gray-100 p-1 rounded transition-all text-red-600" title="${escapeHtml(log.payload)}">${escapeHtml(log.payload)}</div></td>
+                </tr>`;
+            });
+            tbody.innerHTML = htmlString;
+
+            document.getElementById('statTotal').textContent = logs.length;
+            document.getElementById('statSqli').textContent = statSqli;
+            document.getElementById('statXss').textContent = statXss;
+            document.getElementById('statPrompt').textContent = statPrompt;
+        }
+        
+        setTimeout(() => refreshBtn.classList.remove('animate-spin'), 300);
+    } catch (err) {
+        console.error("Failed to fetch logs:", err);
+    }
+}
+
+document.getElementById('refreshBtn').addEventListener('click', fetchLogs);
+// Load initially
+fetchLogs();
+// Auto load every 10 seconds
+setInterval(fetchLogs, 10000);
+
+// AI Report logic
+let attackChartInstance = null;
+let endpointChartInstance = null;
+
+document.getElementById('aiReportBtn').addEventListener('click', async () => {
+    const modal = document.getElementById('aiModal');
+    const content = document.getElementById('aiReportContent');
+    const downloadBtn = document.getElementById('downloadPdfBtn');
+    
+    downloadBtn.classList.add('hidden');
+    modal.classList.remove('hidden');
+    content.innerHTML = `
+        <div class="flex flex-col items-center justify-center py-20 text-gray-500">
+            <svg class="animate-spin h-10 w-10 text-indigo-600 mb-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="animate-pulse font-bold text-lg text-gray-700">데이터 시각화 및 AI 통찰(Insights)을 융합 중입니다...</p>
+            <p class="text-sm mt-2 text-gray-400">데이터의 양에 따라 수 초가 소요될 수 있습니다.</p>
+        </div>
+    `;
+    
+    try {
+        const response = await fetch('/api/dashboard/ai-report');
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            downloadBtn.classList.remove('hidden');
+            
+            // Process Data for Charts
+            const typeCounts = {};
+            const endpointCounts = {};
+            globalLogs.forEach(log => {
+                const type = log.type.split(' (')[0]; // Simplify name like "Local File Inclusion"
+                typeCounts[type] = (typeCounts[type] || 0) + 1;
+                endpointCounts[log.endpoint] = (endpointCounts[log.endpoint] || 0) + 1;
+            });
+            
+            content.innerHTML = `
+                <div class="mb-8 p-6 bg-gray-50 rounded-2xl border border-gray-200 shadow-sm" data-html2canvas-ignore="false">
+                    <h4 class="text-lg font-bold text-gray-800 mb-6 border-b pb-2 flex items-center">
+                        <span class="mr-2">📊</span> 시각적 위협 분석 (Visual Analytics)
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <p class="text-sm font-bold text-gray-500 text-center mb-2">공격 유형별 분포</p>
+                            <div class="h-64"><canvas id="attackTypeChart"></canvas></div>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-gray-500 text-center mb-2">타겟 엔드포인트 빈도</p>
+                            <div class="h-64"><canvas id="endpointChart"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-8 p-6 bg-indigo-50/50 rounded-2xl border border-indigo-100 shadow-sm transition-all duration-300">
+                    <h4 class="text-lg font-bold text-indigo-900 mb-4 border-b border-indigo-200 pb-2 flex items-center">
+                        <span class="mr-2">🤖</span> GPT 보안 전문가 종합 소견
+                    </h4>
+                    <!-- Markdown Content Container with precise styling -->
+                    <div id="markdown-container" class="prose max-w-none text-gray-700 leading-relaxed font-sans" style="font-family: 'Inter', sans-serif; overflow-wrap: break-word; word-break: break-word;">
+                        <style>
+                            #markdown-container h1, #markdown-container h2, #markdown-container h3 { font-weight: 800; color: #111827; margin-top: 1.5em; margin-bottom: 0.5em; }
+                            #markdown-container h1 { font-size: 1.5rem; }
+                            #markdown-container h2 { font-size: 1.25rem; }
+                            #markdown-container h3 { font-size: 1.1rem; }
+                            #markdown-container p { margin-bottom: 1em; line-height: 1.7; }
+                            #markdown-container ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1em; }
+                            #markdown-container li { margin-bottom: 0.5em; }
+                            /* Premium code styling matching the site */
+                            #markdown-container code { background-color: #f3f4f6; padding: 0.2rem 0.4rem; border-radius: 0.375rem; font-family: monospace; font-size: 0.85em; color: #4f46e5; border: 1px solid #e5e7eb; }
+                            #markdown-container pre { background-color: #111827; color: #f9fafb; padding: 1.25rem; border-radius: 0.75rem; overflow-x: auto; margin-bottom: 1.5em; white-space: pre-wrap; word-break: break-all; box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); }
+                            #markdown-container pre code { background-color: transparent; color: inherit; padding: 0; border: none; font-size: 0.9em; }
+                            #markdown-container blockquote { border-left: 4px solid #6366f1; padding-left: 1rem; font-style: italic; color: #6b7280; margin-bottom: 1.5em; background-color: #f8fafc; padding: 1rem; border-radius: 0 0.5rem 0.5rem 0;}
+                        </style>
+                        <div class="markdown-body">
+                            ${marked.parse(data.report)}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Render Charts
+            const ctx1 = document.getElementById('attackTypeChart').getContext('2d');
+            if (attackChartInstance) attackChartInstance.destroy();
+            attackChartInstance = new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(typeCounts),
+                    datasets: [{
+                        data: Object.values(typeCounts),
+                        backgroundColor: ['#f59e0b', '#a855f7', '#ef4444', '#3b82f6', '#10b981', '#64748b']
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    animation: false
+                }
+            });
+
+            const ctx2 = document.getElementById('endpointChart').getContext('2d');
+            if (endpointChartInstance) endpointChartInstance.destroy();
+            endpointChartInstance = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(endpointCounts),
+                    datasets: [{
+                        label: '공격 횟수',
+                        data: Object.values(endpointCounts),
+                        backgroundColor: '#6366f1',
+                        borderRadius: 4
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    animation: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+                }
+            });
+
+        } else {
+            content.innerHTML = '<div class="p-4 bg-red-50 text-red-600 rounded-lg font-mono text-sm border border-red-200">오류가 발생했습니다: ' + escapeHtml(data.message) + '</div>';
+        }
+    } catch (err) {
+        content.innerHTML = '<div class="p-4 bg-red-50 text-red-600 rounded-lg font-mono text-sm border border-red-200">네트워크 통신에 실패했습니다. 서버 상태를 확인해주세요.</div>';
+    }
+});
+
+document.getElementById('downloadPdfBtn').addEventListener('click', () => {
+    const element = document.getElementById('printArea');
+    const modalWrapper = element.parentElement;
+    const modal = document.getElementById('aiModal');
+    const btn = document.getElementById('downloadPdfBtn');
+    
+    btn.innerHTML = '<svg class="animate-spin w-4 h-4 mr-1" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> 생성 중...';
+    btn.disabled = true;
+
+    // Temporarily remove constraints that clip the PDF canvas (max-h, overflow)
+    const oldModalPosition = modal.style.position;
+    
+    modal.classList.remove('fixed', 'inset-0');
+    modal.style.position = 'absolute';
+    
+    const oldModalMaxH = modalWrapper.style.maxHeight;
+    const oldModalOverflow = modalWrapper.style.overflow;
+    const oldElemMaxH = element.style.maxHeight;
+    const oldElemOverflow = element.style.overflow;
+
+    modalWrapper.style.maxHeight = 'auto';
+    modalWrapper.style.overflow = 'visible';
+    element.style.maxHeight = 'auto';
+    element.style.overflow = 'visible';
+
+    // Disable tailwind classes temporarily
+    modalWrapper.classList.remove('max-h-[85vh]', 'overflow-hidden');
+    element.classList.remove('overflow-y-auto');
+
+    const opt = {
+      margin:       10,
+      filename:     'Honey_Threat_Report.pdf',
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true, logging: false },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+    
+    html2pdf().set(opt).from(element).save().then(() => {
+        // Restore styles and classes
+        modal.style.position = oldModalPosition;
+        modal.classList.add('fixed', 'inset-0');
+        
+        modalWrapper.style.maxHeight = oldModalMaxH;
+        modalWrapper.style.overflow = oldModalOverflow;
+        element.style.maxHeight = oldElemMaxH;
+        element.style.overflow = oldElemOverflow;
+
+        modalWrapper.classList.add('max-h-[85vh]', 'overflow-hidden');
+        element.classList.add('overflow-y-auto');
+
+        btn.innerHTML = '<svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> PDF 다운로드';
+        btn.disabled = false;
+    });
+});
+
+document.getElementById('closeModalBtn').addEventListener('click', () => {
+    document.getElementById('aiModal').classList.add('hidden');
+});
+</script>
+{% endblock %}

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Honey - 프리미엄 꿀 마켓{% endblock %}</title>
+    <!-- Tailwind CSS (CDN for quick styling) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom aesthetics for a premium feel */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fcfcfc;
+            color: #333;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+        }
+        .honey-gradient {
+            background: linear-gradient(135deg, #FFB75E 0%, #ED8F03 100%);
+        }
+        .honey-text {
+            background: linear-gradient(135deg, #FFB75E 0%, #ED8F03 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        /* Subtley hide admin/login link for "security through obscurity" feel */
+        .secret-link {
+            color: transparent;
+            text-decoration: none;
+        }
+        .secret-link:hover {
+            color: #ccc;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navigation -->
+    <nav class="glass-panel sticky top-0 z-50 px-6 py-4 flex justify-between items-center transition-all">
+        <div class="flex items-center space-x-2">
+            <a href="/" class="text-2xl font-bold honey-text tracking-wider">🍯 Honey</a>
+        </div>
+        <div class="hidden md:flex space-x-8 font-medium text-gray-600">
+            <a href="/" class="hover:text-amber-500 transition-colors">홈</a>
+            <a href="#" class="hover:text-amber-500 transition-colors">브랜드 스토리</a>
+            <a href="#" class="hover:text-amber-500 transition-colors">스토어</a>
+            <!-- TODO: Remove legacy customer service portal completely. Currently migrated to internal-dev.local:8080 -->
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-8 text-center mt-12">
+        <div class="container mx-auto px-6">
+            <p>&copy; 2026 Honey Premium Natural Farm. All rights reserved.</p>
+            <p class="text-xs mt-2 opacity-50">Powered by Next-Gen AI Customer Service v1.0.2</p>
+        </div>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="relative overflow-hidden honey-gradient min-h-[500px] flex items-center justify-center text-center px-4">
+    <!-- Decorative background elements -->
+    <div class="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/hexellence.png')] mix-blend-overlay"></div>
+    
+    <div class="z-10 max-w-3xl glass-panel p-12 rounded-3xl transform transition duration-500 hover:scale-[1.02]">
+        <h1 class="text-5xl md:text-6xl font-extrabold text-gray-900 mb-6 tracking-tight">
+            자연이 선사하는 <br/>가장 완벽한 <span class="text-amber-600">황금빛 방울</span>
+        </h1>
+        <p class="text-xl text-gray-700 mb-10 leading-relaxed font-light">
+            청정 지대에서 채밀한 100% 천연 벌꿀.<br/>인공 첨가물 없이 자연 그대로의 달콤함을 경험하세요.
+        </p>
+        <div class="flex justify-center gap-4">
+            <a href="#" class="px-8 py-4 bg-gray-900 text-white font-medium rounded-full hover:bg-black transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">전체 상품 보기</a>
+            <a href="#" class="px-8 py-4 bg-white text-gray-900 font-medium rounded-full border border-gray-200 hover:border-amber-400 hover:text-amber-600 transition-all shadow-sm">허니 스토리</a>
+        </div>
+    </div>
+</div>
+
+<div class="container mx-auto px-6 py-20">
+    <div class="text-center mb-16">
+        <h2 class="text-3xl font-bold text-gray-800 mb-4">베스트 판매 상품</h2>
+        <div class="w-24 h-1 honey-gradient mx-auto rounded-full"></div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+        <!-- Product 1 -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl transition-all group flex flex-col items-center">
+            <div class="w-48 h-48 bg-amber-50 rounded-full mb-6 flex items-center justify-center text-6xl group-hover:scale-110 transition-transform">🍯</div>
+            <h3 class="text-xl font-bold mb-2">지리산 천연 야생화꿀</h3>
+            <p class="text-gray-500 mb-4 text-center text-sm">다양한 야생화의 향긋한 풍미가 일품입니다.</p>
+            <p class="text-2xl font-bold honey-text">45,000원</p>
+        </div>
+        <!-- Product 2 -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl transition-all group flex flex-col items-center relative overflow-hidden">
+            <div class="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full z-10">BEST</div>
+            <div class="w-48 h-48 bg-amber-100 rounded-full mb-6 flex items-center justify-center text-6xl group-hover:scale-110 transition-transform">🐝</div>
+            <h3 class="text-xl font-bold mb-2">프리미엄 밤꿀</h3>
+            <p class="text-gray-500 mb-4 text-center text-sm">면역력 강화에 좋은 깊고 쌉쌀한 맛.</p>
+            <p class="text-2xl font-bold honey-text">65,000원</p>
+        </div>
+        <!-- Product 3 -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl transition-all group flex flex-col items-center">
+            <div class="w-48 h-48 bg-amber-50 rounded-full mb-6 flex items-center justify-center text-6xl group-hover:scale-110 transition-transform">🌼</div>
+            <h3 class="text-xl font-bold mb-2">제주 유채꿀</h3>
+            <p class="text-gray-500 mb-4 text-center text-sm">입안 가득 퍼지는 유채꽃의 부드러움.</p>
+            <p class="text-2xl font-bold honey-text">35,000원</p>
+        </div>
+    </div>
+    <div class="py-12 text-center opacity-30 text-xs">
+        정기 점검 안내: 모든 내부 개발 서버는 8080 포트로 이전되었습니다. 
+        <!-- DEBUG: Legacy Dev Server accessible at internal-dev.honey.local:8080 (Temporary) -->
+    </div>
+</div>
+{% endblock %}
