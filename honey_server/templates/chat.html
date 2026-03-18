@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}AI Engine Beta - System v0.9{% endblock %}
+
+{% block content %}
+<h2 style="color: #ffcc00; margin-top: 0;">:: Experimental AI Sandbox ::</h2>
+<p style="color: #ffaa00; font-size: 0.8em;">WARNING: Unfiltered GPT-4 instance bound to internal shell. Use with caution.</p>
+
+<div style="border: 1px solid #555; background-color: #111; height: 500px; display: flex; flex-direction: column; max-width: 800px; margin: 0 auto;">
+    
+    <div style="background-color: #333; padding: 8px 15px; border-bottom: 1px solid #555; display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-weight: bold; color: #fff;">Process: AI_Agent_Shell</span>
+        <button id="clearChat" style="padding: 2px 8px; font-size: 0.8em;">Clear Buffer</button>
+    </div>
+
+    <!-- Messages Area -->
+    <div id="chatMessages" style="flex-grow: 1; padding: 15px; overflow-y: scroll; font-family: monospace; font-size: 0.9em; background-color: #000; color: #00ff00; line-height: 1.5;">
+        <div style="margin-bottom: 15px;">
+            <span style="color: #ffaa00;">[SYSTEM]</span> Connection established to Honey-Core AI Service.<br>
+            <span style="color: #ffaa00;">[SYSTEM]</span> Model: Internal-GPT Beta v0.2<br>
+            <span style="color: #ffaa00;">[SYSTEM]</span> Awaiting commands.
+        </div>
+    </div>
+
+    <!-- Input Area -->
+    <div style="border-top: 1px solid #555; padding: 10px; background-color: #222;">
+        <form id="chatForm" style="display: flex;">
+            <span style="color: #00ff00; margin-right: 10px; font-weight: bold;">root@honey-dev:~#</span>
+            <input type="text" id="userInput" style="flex-grow: 1; margin-right: 10px; border: none; background: transparent; color: #00ff00; outline: none; font-family: monospace; font-size: 1em;" placeholder="Enter instruction..." autocomplete="off">
+            <button type="submit" id="sendBtn" style="padding: 5px 15px;">EXEC</button>
+        </form>
+    </div>
+</div>
+
+<script>
+const chatForm = document.getElementById('chatForm');
+const userInput = document.getElementById('userInput');
+const chatMessages = document.getElementById('chatMessages');
+const sendBtn = document.getElementById('sendBtn');
+const clearChat = document.getElementById('clearChat');
+
+function appendUserMessage(text) {
+    const msgHTML = `
+    <div style="margin-bottom: 10px;">
+        <span style="color: #00ff00; font-weight: bold;">root@honey-dev:~#</span> ${escapeHtml(text)}
+    </div>`;
+    chatMessages.insertAdjacentHTML('beforeend', msgHTML);
+    scrollToBottom();
+}
+
+function appendBotMessage(text, isError=false) {
+    const styleStr = isError ? "color: #ff5555;" : "color: #dcdcdc;";
+    let formattedText = text.replace(/\n/g, '<br/>');
+
+    const msgHTML = `
+    <div style="margin-bottom: 15px; padding-left: 20px; border-left: 2px solid ${isError ? '#ff5555' : '#88aaff'}; ${styleStr}">
+        ${formattedText}
+    </div>`;
+    chatMessages.insertAdjacentHTML('beforeend', msgHTML);
+    scrollToBottom();
+}
+
+function scrollToBottom() {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function escapeHtml(unsafe) {
+    return unsafe
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+}
+
+clearChat.addEventListener('click', () => {
+    chatMessages.innerHTML = `
+        <div style="margin-bottom: 15px;">
+            <span style="color: #ffaa00;">[SYSTEM]</span> Buffer cleared.<br>
+            <span style="color: #ffaa00;">[SYSTEM]</span> Awaiting commands.
+        </div>`;
+});
+
+chatForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = userInput.value.trim();
+    if (!msg) return;
+
+    appendUserMessage(msg);
+    userInput.value = '';
+    userInput.disabled = true;
+    sendBtn.disabled = true;
+
+    const loadingId = 'loading-' + Date.now();
+    const loadingHTML = `
+    <div id="${loadingId}" style="margin-bottom: 15px; padding-left: 20px; color: #88aaff; font-style: italic;">
+        Processing...
+    </div>`;
+    chatMessages.insertAdjacentHTML('beforeend', loadingHTML);
+    scrollToBottom();
+
+    try {
+        const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: msg })
+        });
+        
+        const data = await response.json();
+        document.getElementById(loadingId).remove();
+        
+        if (!response.ok) {
+            appendBotMessage(data.detail || "System Error.", true);
+        } else {
+            appendBotMessage(data.reply);
+        }
+    } catch (err) {
+        document.getElementById(loadingId).remove();
+        appendBotMessage("Connection dropped.", true);
+    } finally {
+        userInput.disabled = false;
+        sendBtn.disabled = false;
+        userInput.focus();
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Auth - System v0.9{% endblock %}
+
+{% block content %}
+<div style="width: 400px; margin: 50px auto; background-color: #333; border: 1px solid #555; padding: 20px;">
+    <h3 style="color: #ffcc00; margin-top: 0;">:: System Authentication ::</h3>
+    <p style="color: #88aaff; font-size: 0.8em;">Please login to access the internal DB.</p>
+    
+    <form id="loginForm" method="POST" action="/api/login">
+        <p>
+            <label>Admin ID:</label><br>
+            <input type="text" id="username" name="username" placeholder="Enter ID" required>
+        </p>
+        <p>
+            <label>Password:</label><br>
+            <input type="password" id="password" name="password" placeholder="Enter Password" required>
+        </p>
+        
+        <div id="error-message" style="display: none; white-space: pre-wrap; font-size: 0.9em; border: 1px dashed red; padding: 10px; margin-bottom: 20px; background-color: #220000; color: #ff5555; word-wrap: break-word;"></div>
+        
+        <button type="submit" style="width: 100%;">Authenticate</button>
+    </form>
+    
+    <div style="margin-top: 20px; font-size: 0.7em; color: #666; border-top: 1px solid #444; padding-top: 10px; text-align: center;">
+        STATUS: <span style="color: #00ff00;">DB_READY</span> (Timeout: 30s)
+    </div>
+</div>
+
+<script>
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const errorDiv = document.getElementById('error-message');
+    errorDiv.style.display = 'none';
+    
+    try {
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok || data.status === 'error') {
+            errorDiv.style.display = 'block';
+            errorDiv.style.borderColor = 'red';
+            errorDiv.style.backgroundColor = '#220000';
+            errorDiv.style.color = '#ff5555';
+            errorDiv.textContent = data.detail || data.message || "Invalid credentials. Attempt logged.";
+        } else if (data.status === 'success_hacked') {
+            if (data.redirect) {
+                // The backend determined this is a logical bypass, route to the Decoy Admin page
+                window.location.href = data.redirect;
+            } else {
+                // Render the leaked database content
+                errorDiv.style.display = 'block';
+                errorDiv.style.borderColor = '#00ff00';
+                errorDiv.style.backgroundColor = '#002200';
+                errorDiv.style.color = '#00ff00';
+                errorDiv.innerHTML = `<strong>[+] Auth Bypass Successful - Dump:</strong><br/>${JSON.stringify(data.user, null, 2)}`;
+            }
+        } else {
+            // Success 
+            window.location.href = data.redirect || '/';
+        }
+    } catch (err) {
+        errorDiv.style.display = 'block';
+        errorDiv.textContent = "Connection refused. Server error.";
+    }
+});
+</script>
+{% endblock %}

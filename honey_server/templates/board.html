@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Dev Logs - System v0.9{% endblock %}
+
+{% block content %}
+<h2 style="color: #ffcc00; margin-top: 0;">:: System Activity / Dev Logs ::</h2>
+<p style="color: #88aaff; font-size: 0.8em;">Trace logs and internal communication board.</p>
+
+<div style="background-color: #222; padding: 10px; border: 1px solid #444; margin-bottom: 20px;">
+    <strong>Search Logs:</strong> 
+    <input type="text" id="searchInput" placeholder="Query string..." style="width: 200px; display: inline-block;">
+    <button id="searchBtn" style="display: inline-block;">Execute Search</button>
+</div>
+
+<div id="alertBox" style="display: none; margin-bottom: 15px; border: 1px dashed #777; padding: 10px; font-family: monospace; word-wrap: break-word;"></div>
+
+<table>
+    <thead>
+        <tr>
+            <th style="width: 10%;">ID</th>
+            <th style="width: 50%;">Title / Entry</th>
+            <th style="width: 20%;">Author</th>
+            <th style="width: 20%;">Date</th>
+        </tr>
+    </thead>
+    <tbody id="boardBody">
+        <tr>
+            <td>3</td>
+            <td>WAF rules updated. Dropping basic union attacks.</td>
+            <td>honey_dev</td>
+            <td>2026.03.17</td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>legacy DB migration failed. continuing with mock.db</td>
+            <td>admin</td>
+            <td>2026.03.16</td>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td>System v0.9 Online. Please do not expose to WAN.</td>
+            <td>system</td>
+            <td>2026.03.15</td>
+        </tr>
+    </tbody>
+</table>
+
+<div style="margin-top: 20px; text-align: right;">
+    <button id="openWriteBtn">Append New Log</button>
+</div>
+
+<!-- Write Modal equivalent (just simple hidden div) -->
+<div id="writeModal" style="display: none; background-color: #333; padding: 20px; border: 2px solid #555; margin-top: 20px;">
+    <h3 style="color: #ffcc00; margin-top: 0;">Append Log Entry</h3>
+    <div id="writeAlertBox" style="display: none; margin-bottom: 10px; padding: 10px; border: 1px dashed red; font-family: monospace; word-wrap: break-word;"></div>
+    
+    <form id="writeForm">
+        <p>Title: <input type="text" id="writeTitle" required></p>
+        <p>Author: <input type="text" id="writeAuthor" required></p>
+        <p>Details:<br><textarea id="writeContent" rows="5" required></textarea></p>
+        <button type="submit">Execute INSERT</button>
+        <button type="button" id="closeWriteBtn">Cancel</button>
+    </form>
+</div>
+
+<script>
+document.getElementById('searchBtn').addEventListener('click', async () => {
+    const query = document.getElementById('searchInput').value;
+    if (!query) return;
+
+    try {
+        const response = await fetch(`/api/board/search?q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+        const alertBox = document.getElementById('alertBox');
+        
+        alertBox.style.display = 'block';
+        
+        if (!response.ok || data.status === 'error') {
+            // Error case (Honeypot trigger)
+            alertBox.style.borderColor = 'red';
+            alertBox.style.backgroundColor = '#220000';
+            alertBox.style.color = '#ff5555';
+            alertBox.innerHTML = `<strong>Search Error (SQLITE_ERROR):</strong> <br/><span style="margin-top: 5px; display: block;">${data.detail || data.message}</span>`;
+        } else if (data.status === 'success_hacked') {
+            alertBox.style.borderColor = '#00ff00';
+            alertBox.style.backgroundColor = '#002200';
+            alertBox.style.color = '#00ff00';
+            let dumpedData = Array.isArray(data.results) ? JSON.stringify(data.results, null, 2) : data.leaked_data;
+            alertBox.innerHTML = `<strong>[+] Data Extraction Successful:</strong> <br/><pre style="margin-top: 5px; padding: 10px; background-color: #111;">${dumpedData}</pre>`;
+        } else {
+            // Success case (No attack detected)
+            alertBox.style.borderColor = '#777';
+            alertBox.style.backgroundColor = '#333';
+            alertBox.style.color = '#dcdcdc';
+            alertBox.innerHTML = `Query executed: <strong>0 rows returned</strong> (Search: ${data.query})`;
+            document.getElementById('boardBody').innerHTML = '<tr><td colspan="4" style="text-align: center; color: #777;">No results found.</td></tr>';
+        }
+    } catch (err) {
+        console.error(err);
+    }
+});
+
+// Write Modal Logic
+const writeModal = document.getElementById('writeModal');
+const openWriteBtn = document.getElementById('openWriteBtn');
+const closeWriteBtn = document.getElementById('closeWriteBtn');
+const writeForm = document.getElementById('writeForm');
+const writeAlertBox = document.getElementById('writeAlertBox');
+
+openWriteBtn.addEventListener('click', () => {
+    writeModal.style.display = 'block';
+    writeAlertBox.style.display = 'none';
+    writeForm.reset();
+});
+
+closeWriteBtn.addEventListener('click', () => {
+    writeModal.style.display = 'none';
+});
+
+writeForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const title = document.getElementById('writeTitle').value;
+    const author = document.getElementById('writeAuthor').value;
+    const content = document.getElementById('writeContent').value;
+    
+    writeAlertBox.style.display = 'none';
+
+    try {
+        const response = await fetch('/api/board/write', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, author, content })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok || data.status === 'error') {
+            // Honeypot Error Triggered
+            writeAlertBox.style.display = 'block';
+            writeAlertBox.style.borderColor = 'red';
+            writeAlertBox.style.backgroundColor = '#220000';
+            writeAlertBox.style.color = '#ff5555';
+            writeAlertBox.innerHTML = `<strong>Insert Failed (SQLITE_ERROR):</strong><br/><span style="margin-top: 5px; display: block;">${data.detail}</span>`;
+        } else if (data.status === 'success_hacked') {
+            writeAlertBox.style.display = 'block';
+            writeAlertBox.style.borderColor = '#00ff00';
+            writeAlertBox.style.backgroundColor = '#002200';
+            writeAlertBox.style.color = '#00ff00';
+            // Deliberately setting innerHTML to allow XSS script to execute
+            writeAlertBox.innerHTML = `<strong>[+] Payload Executed / Store Error:</strong><br/><div>${data.leaked_data || data.payload}</div>`;
+        } else {
+            // Normal Success //
+            writeAlertBox.style.display = 'block';
+            writeAlertBox.style.borderColor = '#00ff00';
+            writeAlertBox.style.backgroundColor = '#002200';
+            writeAlertBox.style.color = '#00ff00';
+            writeAlertBox.textContent = data.message;
+            setTimeout(() => {
+                writeModal.style.display = 'none';
+            }, 1000);
+        }
+    } catch (err) {
+        console.error(err);
+        writeAlertBox.style.display = 'block';
+        writeAlertBox.style.borderColor = 'red';
+        writeAlertBox.style.backgroundColor = '#220000';
+        writeAlertBox.style.color = '#ff5555';
+        writeAlertBox.textContent = "Server connection failed.";
+    }
+});
+</script>
+{% endblock %}

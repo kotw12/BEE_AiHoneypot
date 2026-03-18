@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}System Admin Dashboard - v0.9{% endblock %}
+
+{% block content %}
+<div style="background-color: #550000; color: white; padding: 5px 10px; font-weight: bold; border: 1px solid #ff0000; margin-bottom: 20px;">
+    [ROOT_ACCESS_GRANTED] HONEY_ADMIN_SYSTEM (v0.9.beta)
+    <span style="float: right; font-weight: normal; font-size: 0.8em;">
+        Time: <span id="clock" style="font-family: monospace;"></span> | Uptime: 243d 12h | User: <span style="color: #00ff00;">root</span>
+    </span>
+    <div style="clear: both;"></div>
+</div>
+
+<div style="border: 1px dashed red; padding: 10px; background-color: #331111; margin-bottom: 20px;">
+    <h3 style="color: #ff5555; margin-top: 0;">:: SECURITY ALERT ::</h3>
+    <p style="font-size: 0.9em; margin-bottom: 0;">Unusual login patterns detected on port 8080. Please monitor the dev logs.</p>
+</div>
+
+<!-- Left Column: User DB Dump -->
+<div style="float: left; width: 60%; padding-right: 20px; box-sizing: border-box;">
+    
+    <div style="background-color: #222; border: 1px solid #555; margin-bottom: 20px;">
+        <div style="background-color: #444; padding: 5px 10px; font-weight: bold;">
+            DB Cache [table: users] - LIMIT 5
+        </div>
+        <div style="padding: 10px; overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Password_Hash (MD5)</th>
+                    </tr>
+                </thead>
+                <tbody style="font-family: monospace; font-size: 0.9em; color: #aaa;">
+                    <tr>
+                        <td>1</td>
+                        <td>admin_internal</td>
+                        <td>admin@honey.local</td>
+                        <td style="color: #ff5555;">FLAG{SQLI_MASTER_LOGGED_IN}</td>
+                    </tr>
+                    <tr>
+                        <td>1001</td>
+                        <td>test_user1</td>
+                        <td>test1@honey.local</td>
+                        <td>5f4dcc3b5aa765d61d8327deb882cf99</td>
+                    </tr>
+                    <tr>
+                        <td>1002</td>
+                        <td>manager</td>
+                        <td>manager@honey.local</td>
+                        <td>8d969eef6ecad3c29a3a629280e686cf</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Fake Financials -->
+    <div style="background-color: #222; border: 1px solid #555;">
+        <div style="background-color: #444; padding: 5px 10px; font-weight: bold;">
+            Monthly Revenue Report
+        </div>
+        <div style="padding: 20px; text-align: center;">
+            <p style="color: #88aaff; font-size: 0.8em; margin-bottom: 5px;">Total Processing Volume (KRW)</p>
+            <h2 style="color: #00ff00; margin: 0; font-family: monospace; font-size: 2.5em;">₩ 42,910,000</h2>
+            <p style="color: #55ff55; font-size: 0.8em;">+12% vs last month</p>
+        </div>
+    </div>
+
+</div>
+
+<!-- Right Column: System Config -->
+<div style="float: right; width: 40%; box-sizing: border-box;">
+    
+    <div style="background-color: #222; border: 1px solid #555;">
+        <div style="background-color: #444; padding: 5px 10px; font-weight: bold;">
+            Environment Variables (.env cache)
+        </div>
+        <div style="padding: 10px;">
+            <ul style="list-style-type: none; padding: 0; margin: 0; font-family: monospace; font-size: 0.85em;">
+                <li style="margin-bottom: 10px;">
+                    <span style="color: #88aaff; display: block;">DB_HOST</span>
+                    <span style="color: #dcdcdc; font-weight: bold;">127.0.0.1:3306</span>
+                </li>
+                <li style="margin-bottom: 10px;">
+                    <span style="color: #88aaff; display: block;">DB_USER</span>
+                    <span style="color: #dcdcdc; font-weight: bold;">root</span>
+                </li>
+                <li style="margin-bottom: 10px;">
+                    <span style="color: #88aaff; display: block;">SECRET_KEY</span>
+                    <span style="color: #ff00ff; font-weight: bold;">Honey_Super_Secret_Key_123!</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Phase 3: RCE Tool -->
+    <div style="background-color: #222; border: 1px solid #555; margin-top: 20px;">
+        <div style="background-color: #444; padding: 5px 10px; font-weight: bold; display: flex; justify-content: space-between;">
+            <span>Network Diagnostic Tool</span>
+            <span style="color: #ffcc00; font-size: 0.8em;">(root)</span>
+        </div>
+        <div style="padding: 10px;">
+            <p style="font-size: 0.8em; color: #aaa; margin-top: 0;">Test connectivity to internal DB nodes.</p>
+            <form id="pingForm">
+                <input type="text" id="pingTarget" placeholder="IP Address (e.g. 192.168.1.10)" value="127.0.0.1" style="width: 60%; background-color: #111; color: #00ff00; border: 1px solid #555; padding: 5px; font-family: monospace;">
+                <button type="submit" style="padding: 5px 10px; background-color: #333; color: white; border: 1px solid #777;">Ping</button>
+            </form>
+            <div id="pingOutput" style="display: none; margin-top: 10px; padding: 10px; background-color: #000; color: #00ff00; font-family: monospace; font-size: 0.8em; border: 1px solid #444; max-height: 150px; overflow-y: auto; white-space: pre-wrap;"></div>
+        </div>
+    </div>
+
+    <!-- Phase 3: LFI Tool -->
+    <div style="background-color: #222; border: 1px solid #555; margin-top: 20px;">
+        <div style="background-color: #444; padding: 5px 10px; font-weight: bold;">
+            System Log Viewer
+        </div>
+        <div style="padding: 10px;">
+            <p style="font-size: 0.8em; color: #aaa; margin-top: 0;">Read local log files from /var/log/honey/</p>
+            <form id="logForm">
+                <select id="logFile" style="width: 60%; background-color: #111; color: #00ff00; border: 1px solid #555; padding: 5px; font-family: monospace;">
+                    <option value="access.log">access.log</option>
+                    <option value="error.log">error.log</option>
+                    <option value="db_sync.log">db_sync.log</option>
+                </select>
+                <!-- Hidden input intended for manipulation -->
+                <input type="text" id="customLogFile" placeholder="Or custom path..." style="width: 60%; display: none; margin-top: 5px; background-color: #111; color: #ffaa00; border: 1px solid #555; padding: 5px; font-family: monospace;">
+                <button type="button" onclick="document.getElementById('customLogFile').style.display='block'; document.getElementById('logFile').style.display='none'; document.getElementById('logFile').value='';">Manual</button>
+                <button type="submit" style="padding: 5px 10px; background-color: #333; color: white; border: 1px solid #777; margin-top: 5px;">Read</button>
+            </form>
+            <div id="logOutput" style="display: none; margin-top: 10px; padding: 10px; background-color: #000; color: #dcdcdc; font-family: monospace; font-size: 0.8em; border: 1px solid #444; max-height: 200px; overflow-y: auto; white-space: pre-wrap;"></div>
+        </div>
+    </div>
+</div>
+
+<div style="clear: both;"></div>
+
+<script>
+    setInterval(() => {
+        document.getElementById('clock').textContent = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    }, 1000);
+
+    // RCE Implementation
+    document.getElementById('pingForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const target = document.getElementById('pingTarget').value;
+        const outDiv = document.getElementById('pingOutput');
+        outDiv.style.display = 'block';
+        outDiv.style.color = '#88aaff';
+        outDiv.textContent = `Executing: ping -c 3 ${target}\nWaiting for response...`;
+        
+        try {
+            const res = await fetch('/api/admin/network_test', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({target: target})
+            });
+            const data = await res.json();
+            outDiv.style.color = data.status === 'error' ? '#ff5555' : '#00ff00';
+            outDiv.textContent = data.output || data.detail;
+        } catch(err) {
+            outDiv.style.color = '#ff5555';
+            outDiv.textContent = 'Network Error.';
+        }
+    });
+
+    // LFI Implementation
+    document.getElementById('logForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        let file = document.getElementById('customLogFile').value;
+        if (!file && document.getElementById('customLogFile').style.display === 'none') {
+            file = document.getElementById('logFile').value;
+        }
+        
+        const outDiv = document.getElementById('logOutput');
+        outDiv.style.display = 'block';
+        outDiv.style.color = '#88aaff';
+        outDiv.textContent = `Reading ${file}...`;
+        
+        try {
+            const res = await fetch(`/api/admin/view_log?file=${encodeURIComponent(file)}`);
+            const data = await res.json();
+            outDiv.style.color = data.status === 'error' ? '#ff5555' : '#dcdcdc';
+            outDiv.textContent = data.content || data.detail;
+        } catch(err) {
+            outDiv.style.color = '#ff5555';
+            outDiv.textContent = 'Network Error.';
+        }
+    });
+</script>
+{% endblock %}

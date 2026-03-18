@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Internal System v0.9 Beta{% endblock %}</title>
+    <!-- Using an older, clunky style to simulate a legacy/internal system -->
+    <style>
+        body {
+            font-family: "Courier New", Courier, monospace;
+            background-color: #2b2b2b;
+            color: #dcdcdc;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #1a1a1a;
+            padding: 15px 20px;
+            border-bottom: 2px solid #444;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            color: #ffcc00;
+            font-weight: bold;
+            font-size: 1.2em;
+            text-decoration: none;
+        }
+        .nav-links a {
+            color: #88aaff;
+            text-decoration: none;
+            margin-left: 15px;
+            font-size: 0.9em;
+        }
+        .nav-links a:hover {
+            text-decoration: underline;
+            color: #fff;
+        }
+        main {
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .warning-banner {
+            background-color: #8a2be2;
+            color: white;
+            text-align: center;
+            padding: 5px;
+            font-size: 0.8em;
+            font-family: sans-serif;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 50px;
+            border-top: 1px dashed #444;
+        }
+        /* Ugly tables for legacy feel */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background-color: #333;
+        }
+        th, td {
+            border: 1px solid #555;
+            padding: 8px;
+            text-align: left;
+        }
+        th { background-color: #444; }
+        /* Clunky forms */
+        input[type="text"], input[type="password"], textarea {
+            background-color: #1e1e1e;
+            color: #00ff00;
+            border: 1px solid #555;
+            padding: 5px;
+            font-family: monospace;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #444;
+            color: white;
+            border: 1px solid #777;
+            padding: 5px 15px;
+            cursor: pointer;
+            font-family: monospace;
+        }
+        button:hover { background-color: #666; }
+        .error-msg { color: #ff5555; font-weight: bold; margin-top: 10px; }
+        .success-msg { color: #55ff55; font-weight: bold; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="warning-banner">
+        [CONFIDENTIAL] Honey Farm Internal Dev Server - Do Not Share
+    </div>
+    <header>
+        <a href="/login" class="logo">System_Console_v0.9</a>
+        <div class="nav-links">
+            <a href="/login">[ Auth ]</a>
+            <a href="/board">[ Dev_Logs ]</a>
+            <a href="/chat">[ AI_Beta ]</a>
+        </div>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>Legacy Internal Portal. Scheduled for deprecation in Q4 2026.</p>
+        <p>If you encounter SQL debugging traces, please report to honey_dev.</p>
+    </footer>
+</body>
+</html>
