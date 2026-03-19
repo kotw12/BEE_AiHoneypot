@@ -172,8 +172,8 @@ def insert_fake_data(conn, json_string):
         cursor.executemany("INSERT OR IGNORE INTO orders VALUES (?, ?, ?, ?, ?)", orders)
 
     if "order_details" in data:
-        details = [(od.get("id"), od.get("product_id"), od.get("quantity"), od.get("unit_price")) for od in data["order_details"]]
-        cursor.executemany("INSERT INTO order_details (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)", details)
+        details = [(od.get("id"), od.get("order_id"), od.get("product_id"), od.get("quantity"), od.get("unit_price")) for od in data["order_details"]]
+        cursor.executemany("INSERT INTO order_details (id, order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?, ?)", details)
 
     conn.commit()
     print("데이터 DB 삽입 완료")
