@@ -39,7 +39,8 @@ user_prompt = """
     shipping_address: 주소(한글 도로명 주소, 필요에 따라 무슨 동 몇 호까지 기재) ex)경기도 성남시 분당구 성남대로 485번길 89-23 101동 703호
 ]
 - order_details: [
-    id: order_id 값,
+    id: id 고유값(오래된 주문 내역이 삭제된 것을 상정하여 189327부터 시작),
+    order_id: order_id값
     product_id: 물품 종류, 
     quantity: 주문 수량, 
     unit_price: 물품 가격(product_id에 해당하는 물품의 price)
