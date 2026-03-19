@@ -92,7 +92,7 @@ ssh ubuntu@<HONEY_IP> 'cd ~/honey_server && chmod +x start.sh && ./start.sh'
 ### 2. .env 환경변수 설정
 ```bash
 # honey_server/.env
-MONITOR_URL=http://10.0.2.50:9000    # Monitor Server 프라이빗 IP
+MONITOR_URL=http://10.0.190.50:9000    # Monitor Server 프라이빗 IP
 LOG_SECRET=your-secure-secret-here
 
 # monitor_server/.env
