@@ -1,4 +1,3 @@
-import json
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
@@ -7,10 +6,13 @@ load_dotenv()
 
 client = OpenAI(api_key=os.getenv('API_KEY'))
 
-system_instruction = """온라인 꿀 판매 사이트 허니팟 DB용 가짜 데이터를 JSON 형태로 반환해. 
-최상위 키로 users, products, orders, order_details를 가져야 해."""
+system_instruction = """
+온라인 꿀 판매 사이트 허니팟 DB용 가짜 데이터를 JSON 형태로 반환해. 
+최상위 키로 users, products, orders, order_details를 가져야 해.
+"""
 
-user_prompt = """다음 조건에 맞춰 각 테이블별 허위 데이터를 10개씩 생성해. 데이터는 유기적으로 연결되어야 해.
+user_prompt = """
+다음 조건에 맞춰 각 테이블별 허위 데이터를 10개씩 생성해. 데이터는 유기적으로 연결되어야 해.
 - users: [
     id: id 고유값,
     username: 한국인 이름 기반의 현실적인 영문/영문+숫자 아이디,
@@ -34,7 +36,7 @@ user_prompt = """다음 조건에 맞춰 각 테이블별 허위 데이터를 10
     user_id: 유저 id,
     total_price: 주문 금액,
     order_status: 주문 상태(주문 완료, 배송 시작, 주문 완료, 주문 취소 등),
-    shipping_address: 주소(한글 도로명 주소, 필요에 따라 XX동 XX호까지 기재)
+    shipping_address: 주소(한글 도로명 주소, 필요에 따라 무슨 동 몇 호까지 기재) ex)경기도 성남시 분당구 성남대로 485번길 89-23 101동 703호
 ]
 - order_details: [
     id: order_id 값,
@@ -43,20 +45,15 @@ user_prompt = """다음 조건에 맞춰 각 테이블별 허위 데이터를 10
     unit_price: 물품 가격(product_id에 해당하는 물품의 price)
 ]
 """
-#- board_posts: id, user_id, title(해킹 시도를 유도할 만한 환불/비밀글 제목 등), content, is_secret(true/false)
-#- saved_payments: id, user_id, card_number(16자리), expiry_date(MM/YY), cvv(3자리)
-#"""
 
-response = client.chat.completions.create(
+response = client.responses.create(
     model="gpt-4o",
-    messages=[
+    input=[
         {"role": "system", "content": system_instruction},
         {"role": "user", "content": user_prompt}
-    ],
-    response_format={"type": "json_object"}
+    ]
 )
 
-data_output = response.choices[0].message.content
+data_output = response.output_text
 
-print("가짜 데이터 생성 결과:")
 print(data_output)
