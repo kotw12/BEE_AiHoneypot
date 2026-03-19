@@ -38,6 +38,8 @@ USER_PROMPT = """
 - "total_points": 보유 적립금 (정수형, 예: 2500, 10000)
 - "purchase_count": 구매 횟수 (정수형, 예: 5, 12)
 - "total_purchase_amount": 누적 구매 금액 (정수형, 예: 150000, 3200000)
+- "recent_purchase": 최근 구매 내역 ('지리산 야생화꿀', '프리미엄 밤꿀', '제주 유채꿀' 중 1개 선택)
+- "membership_level": 회원 등급 (총 구매 금액에 맞춰서 '실버', '골드', 'VIP' 중 현실성 있게 부여)
 
 [출력 형식 예시]
 [
@@ -52,7 +54,9 @@ USER_PROMPT = """
     "phone_number": "010-9988-7766",
     "total_points": 5000,
     "purchase_count": 8,
-    "total_purchase_amount": 250000
+    "total_purchase_amount": 250000,
+    "recent_purchase": "지리산 야생화꿀",
+    "membership_level": "골드"
   }
 ]
 """
@@ -89,8 +93,8 @@ def generate_and_insert_users():
         for user in users:
              # users 테이블에 값 삽입
              c.execute(
-                 "INSERT INTO users (username, real_name, email, password_hash, role, zipcode, last_login, phone_number, total_points, purchase_count, total_purchase_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                 (user["username"], user.get("real_name", ""), user["email"], user["password_hash"], user["role"], user.get("zipcode", ""), user.get("last_login", ""), user.get("phone_number", ""), user.get("total_points", 0), user.get("purchase_count", 0), user.get("total_purchase_amount", 0))
+                 "INSERT INTO users (username, real_name, email, password_hash, role, zipcode, last_login, phone_number, total_points, purchase_count, total_purchase_amount, recent_purchase, membership_level) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                 (user["username"], user.get("real_name", ""), user["email"], user["password_hash"], user["role"], user.get("zipcode", ""), user.get("last_login", ""), user.get("phone_number", ""), user.get("total_points", 0), user.get("purchase_count", 0), user.get("total_purchase_amount", 0), user.get("recent_purchase", ""), user.get("membership_level", ""))
              )
              count += 1
              
